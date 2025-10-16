@@ -1,0 +1,23 @@
+// app/(main)/layout.tsx
+import Header from '@/components/sections/Header';
+import Navigation from '@/components/sections/Navigation';
+import CurrencySelector from '@/components/ui/CurrencySelector';
+
+// This comment explains the layout's role.
+// This layout provides the common chrome (Header, Nav) for the main application pages.
+export default function MainLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="p-4 py-8 max-w-6xl mx-auto">
+      <div className="relative">
+        <div className="absolute top-0 right-0 z-10">
+          <CurrencySelector />
+        </div>
+        <Header />
+      </div>
+      <Navigation />
+      <main id="main-content" role="main">
+        {children}
+      </main>
+    </div>
+  );
+}

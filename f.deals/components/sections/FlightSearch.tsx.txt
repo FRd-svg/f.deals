@@ -1,0 +1,118 @@
+// components/sections/FlightSearch.tsx
+'use client';
+
+import { useState } from 'react';
+import { useForm, SubmitHandler } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { AirportCombobox } from '@/components/ui/AirportCombobox';
+import { Button } from '@/components/ui/Button';
+import { DatePicker } from '@/components/ui/DatePicker';
+import { Loader2, Zap, ArrowRightLeft } from 'lucide-react';
+
+// This comment explains the form schema connection.
+// Zod is used for robust form validation. The schema defines the required fields and their types.
+const searchSchema = z.object({
+  departureAirport: z.string().min(3, "Please select a departure airport."),
+  arrivalAirport: z.string().min(3, "Please select an arrival airport."),
+  departureDate: z.date({ required_error: "A departure date is required." }),
+  returnDate: z.date().optional(),
+  tripType: z.enum(['round-trip', 'one-way']),
+}).refine(data => data.departureAirport !== data.arrivalAirport, {
+  message: "Departure and arrival airports cannot be the same.",
+  path: ["arrivalAirport"],
+});
+
+type SearchFormValues = z.infer<typeof searchSchema>;
+
+export default function FlightSearch() {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const form = useForm<SearchFormValues>({
+    resolver: zodResolver(searchSchema),
+    defaultValues: {
+      tripType: 'round-trip',
+    },
+  });
+
+  const tripType = form.watch('tripType');
+
+  // This comment explains the data flow for form submission.
+  // The onSubmit function handles form validation and calls the internal API endpoint.
+  const onSubmit: SubmitHandler<SearchFormValues> = async (data) => {
+    setIsLoading(true);
+    console.log("Form submitted:", data);
+    try {
+      // Data flows from the form to our internal API route for processing.
+      const response = await fetch('/api/flights/search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      const results = await response.json();
+      console.log('Search results:', results);
+      // Here you would handle the results, e.g., show them or navigate.
+    } catch (error) {
+      console.error("Search failed:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="bg-white rounded-2xl shadow-lg p-6">
+      {/* Form and its components are connected here */}
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <div className="relative">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+            <AirportCombobox
+              form={form}
+              name="departureAirport"
+              placeholder="From where?"
+            />
+            <AirportCombobox
+              form={form}
+              name="arrivalAirport"
+              placeholder="To where?"
+            />
+            {/* The swap button is connected to the form's setValue function */}
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white z-10"
+              onClick={() => {
+                const dep = form.getValues('departureAirport');
+                const arr = form.getValues('arrivalAirport');
+                form.setValue('departureAirport', arr);
+                form.setValue('arrivalAirport', dep);
+              }}
+            >
+              <ArrowRightLeft className="h-4 w-4" />
+            </Button>
+          </div>
+          {form.formState.errors.arrivalAirport?.message && (
+             <p className="text-sm text-red-500 mt-2 text-center">{form.formState.errors.arrivalAirport.message}</p>
+          )}
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <DatePicker form={form} name="departureDate" placeholder="Departure Date" />
+          {tripType === 'round-trip' && (
+            <DatePicker form={form} name="returnDate" placeholder="Return Date" />
+          )}
+        </div>
+        <Button type="submit" className="w-full text-lg py-6" disabled={isLoading}>
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Searching...
+            </>
+          ) : (
+            <>
+              <Zap className="mr-2 h-5 w-5" /> Find Smart Deals
+            </>
+          )}
+        </Button>
+      </form>
+    </div>
+  );
+}

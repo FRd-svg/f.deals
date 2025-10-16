@@ -1,0 +1,52 @@
+// components/sections/RecentDeals.tsx
+'use client';
+
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { DealCard } from '@/components/ui/DealCard';
+import { type Deal } from '@/lib/types';
+import { ArrowRight } from 'lucide-react';
+
+export default function RecentDeals() {
+  const [deals, setDeals] = useState<Deal[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // This comment explains the data flow connection.
+  // The `useEffect` hook runs on component mount. It fetches data
+  // from our internal API endpoint `/api/deals` and updates the component's state.
+  useEffect(() => {
+    const fetchDeals = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch('/api/deals');
+        const data: Deal[] = await response.json();
+        // We only show the first 2 as "recent"
+        setDeals(data.slice(0, 2)); 
+      } catch (error) {
+        console.error("Failed to fetch recent deals:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchDeals();
+  }, []);
+
+  return (
+    <section className="bg-white rounded-2xl shadow-lg p-6" aria-labelledby="recent-deals-heading">
+      <div className="flex items-center justify-between mb-6">
+        <h2 id="recent-deals-heading" className="text-xl font-semibold">Recent Price Anomalies</h2>
+        {/* This Link connects the user to the full alerts page */}
+        <Link href="/alerts" className="text-nude-blue font-medium flex items-center hover:underline">
+          View All Deals <ArrowRight className="ml-2 h-4 w-4" />
+        </Link>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {isLoading ? (
+          <p>Loading deals...</p>
+        ) : (
+          deals.map(deal => <DealCard key={deal.id} deal={deal} />)
+        )}
+      </div>
+    </section>
+  );
+}

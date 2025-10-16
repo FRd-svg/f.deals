@@ -1,0 +1,22 @@
+// components/sections/Header.tsx
+import React from 'react';
+import { PlaneTakeoff } from 'lucide-react';
+
+// This is a simple presentational component.
+// It doesn't need any state or client-side interactivity,
+// so it remains a Server Component by default for best performance.
+export default function Header() {
+  return (
+    <header className="text-center mb-8" role="banner">
+      <div className="flex justify-center items-center gap-4 mb-4">
+        <PlaneTakeoff className="h-10 w-10 text-nude-blue" />
+        <h1 className="text-4xl font-extrabold text-nude-black tracking-tight">
+          Flight Promotion Finder
+        </h1>
+      </div>
+      <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+        Find legitimate price anomalies and great flight deals with our intelligent search
+      </p>
+    </header>
+  );
+}

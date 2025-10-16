@@ -1,0 +1,52 @@
+// components/sections/Navigation.tsx
+'use client';
+
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { Search, Bell, Heart } from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+// This comment explains the navigation item structure.
+// Each navItem object defines the path, icon, and text for a navigation link.
+const navItems = [
+  { href: '/', icon: Search, label: 'Search Flights', description: 'Find deals instantly' },
+  { href: '/alerts', icon: Bell, label: 'Deal Alerts', description: 'Price anomaly notifications' },
+  { href: '/saved', icon: Heart, label: 'Saved Deals', description: 'Your tracked routes' },
+];
+
+export default function Navigation() {
+  // This comment explains the routing connection.
+  // The `usePathname` hook from Next.js gets the current URL.
+  // This is used to apply an 'active' style to the correct navigation link.
+  const pathname = usePathname();
+
+  return (
+    <nav className="bg-white rounded-2xl shadow-lg p-2 mb-8" aria-label="Main navigation">
+      <div className="flex">
+        {navItems.map((item) => {
+          const isActive = pathname === item.href;
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={cn(
+                'flex-1 text-center py-4 rounded-xl cursor-pointer transition-all duration-300 ease-in-out transform hover:bg-slate-100 hover:scale-105',
+                isActive ? 'bg-nude-blue text-white shadow-md scale-105' : 'text-gray-700'
+              )}
+              aria-current={isActive ? 'page' : undefined}
+            >
+              <item.icon className="mx-auto h-7 w-7 mb-2" strokeWidth={isActive ? 2.5 : 2} />
+              <div className="font-semibold">{item.label}</div>
+              <div className="text-xs opacity-80">{item.description}</div>
+              {item.label === 'Deal Alerts' && !isActive && (
+                <div className="absolute top-2 right-2 bg-alert-red text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                  8
+                </div>
+              )}
+            </Link>
+          );
+        })}
+      </div>
+    </nav>
+  );
+}

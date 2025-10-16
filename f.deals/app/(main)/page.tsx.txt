@@ -1,0 +1,14 @@
+// app/(main)/page.tsx
+import FlightSearch from "@/components/sections/FlightSearch";
+import RecentDeals from "@/components/sections/RecentDeals";
+
+// This comment explains the page's structure.
+// The homepage is composed of two main sections: the search form and the recent deals list.
+export default function HomePage() {
+  return (
+    <div className="space-y-8">
+      <FlightSearch />
+      <RecentDeals />
+    </div>
+  );
+}

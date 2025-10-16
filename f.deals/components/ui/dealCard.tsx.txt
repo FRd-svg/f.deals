@@ -1,0 +1,92 @@
+// components/ui/DealCard.tsx
+'use client';
+
+import { useMemo } from 'react';
+import { useAppContext } from '@/components/providers/AppProvider';
+import { getAirportByCode } from '@/lib/utils';
+import { type Deal } from '@/lib/types';
+import { cn, formatCurrency, formatDate, timeAgo } from '@/lib/utils';
+import { Button } from './Button';
+import { ExternalLink, Calendar, Clock } from 'lucide-react';
+
+interface DealCardProps {
+  deal: Deal;
+}
+
+export function DealCard({ deal }: DealCardProps) {
+  // This comment explains the context connection.
+  // The DealCard component consumes the current currency from the AppContext.
+  const { currency } = useAppContext();
+
+  // This comment explains the data flow connection.
+  // Price conversion logic is encapsulated using useMemo for performance.
+  // Data flows from the `deal` prop and `currency` context to the rendered output.
+  const prices = useMemo(() => {
+    return {
+      price: formatCurrency(deal.price, currency),
+      originalPrice: formatCurrency(deal.originalPrice, currency),
+    };
+  }, [deal.price, deal.originalPrice, currency]);
+  
+  const fromAirport = getAirportByCode(deal.from);
+  const toAirport = getAirportByCode(deal.to);
+
+  const handleBookNow = () => {
+    // A real app would have server-side validation for this link
+    window.open(deal.affiliateLink, '_blank', 'noopener,noreferrer');
+  }
+
+  const dealTypeClasses = {
+    anomaly: 'border-l-premium-gold bg-yellow-50',
+    hot: 'border-l-alert-red bg-red-50',
+    default: 'border-l-ethical-green',
+  };
+
+  return (
+    <div
+      className={cn(
+        'bg-white rounded-xl p-4 shadow-md border-l-4 transition-all hover:shadow-lg hover:-translate-y-1',
+        dealTypeClasses[deal.type] || dealTypeClasses.default,
+        deal.isNew && 'animate-pulse'
+      )}
+    >
+      <div className="flex justify-between items-start mb-3">
+        <div>
+          <h3 className="font-bold text-lg flex items-center gap-2">
+            <span>{fromAirport?.city} ({deal.from}) → {toAirport?.city} ({deal.to})</span>
+            {deal.type === 'anomaly' && <span className="text-xs bg-premium-gold text-white px-2 py-1 rounded-full">ANOMALY</span>}
+            {deal.type === 'hot' && <span className="text-xs bg-alert-red text-white px-2 py-1 rounded-full">HOT DEAL</span>}
+          </h3>
+          <p className="text-sm text-gray-600">{deal.airline} • Round Trip</p>
+        </div>
+        <div className="text-right">
+          <p className="text-2xl font-bold text-ethical-green">{prices.price}</p>
+          <p className="text-sm text-gray-500 line-through">{prices.originalPrice}</p>
+        </div>
+      </div>
+
+      <div className="flex justify-between items-center text-sm text-gray-500 mb-4">
+        <div className="flex items-center gap-2">
+          <Calendar className="h-4 w-4" />
+          <span>{formatDate(deal.departureDate)} - {formatDate(deal.returnDate)}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <Clock className="h-4 w-4" />
+          <span>Detected {timeAgo(deal.detectedAt)}</span>
+        </div>
+      </div>
+      
+      <div className="flex justify-between items-center">
+        <div>
+          <p className="text-sm font-semibold">Confidence: {deal.confidence}%</p>
+          <div className="w-32 h-2 bg-gray-200 rounded-full overflow-hidden mt-1">
+            <div className="h-full bg-ethical-green" style={{ width: `${deal.confidence}%` }}></div>
+          </div>
+        </div>
+        <Button onClick={handleBookNow}>
+          Book Now <ExternalLink className="ml-2 h-4 w-4" />
+        </Button>
+      </div>
+    </div>
+  );
+}

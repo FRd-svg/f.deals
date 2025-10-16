@@ -1,0 +1,94 @@
+// components/ui/AirportCombobox.tsx
+"use client"
+
+import * as React from "react"
+import { Check, ChevronsUpDown, PlaneTakeoff } from "lucide-react"
+import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/Button"
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/Command"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/Popover"
+import { AIRPORTS } from "@/lib/constants"
+import { UseFormReturn } from "react-hook-form"
+
+interface AirportComboboxProps {
+  form: UseFormReturn<any>;
+  name: string;
+  placeholder: string;
+}
+
+// This component connects a 3rd-party combobox library (`cmdk`) to our form state (`react-hook-form`).
+export function AirportCombobox({ form, name, placeholder }: AirportComboboxProps) {
+  const [open, setOpen] = React.useState(false);
+  const value = form.watch(name);
+
+  return (
+    <div>
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            role="combobox"
+            aria-expanded={open}
+            className="w-full justify-between h-14 text-md"
+          >
+            <div className="flex items-center">
+              <PlaneTakeoff className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+              {value
+                ? `${AIRPORTS.find((airport) => airport.code === value)?.city} (${value})`
+                : placeholder}
+            </div>
+            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-[300px] p-0">
+          <Command>
+            <CommandInput placeholder="Search airport or city..." />
+            <CommandList>
+              <CommandEmpty>No airport found.</CommandEmpty>
+              <CommandGroup>
+                {AIRPORTS.map((airport) => (
+                  <CommandItem
+                    key={airport.code}
+                    value={`${airport.city} ${airport.name} ${airport.code}`}
+                    onSelect={() => {
+                      // This `onSelect` function connects the combobox selection back to the main form state.
+                      form.setValue(name, airport.code, { shouldValidate: true });
+                      setOpen(false);
+                    }}
+                  >
+                    <Check
+                      className={cn(
+                        "mr-2 h-4 w-4",
+                        value === airport.code ? "opacity-100" : "opacity-0"
+                      )}
+                    />
+                    <div>
+                      <p className="font-semibold">{airport.city} ({airport.code})</p>
+                      <p className="text-xs text-gray-500">{airport.name}</p>
+                    </div>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
+      {form.formState.errors[name] && (
+        <p className="text-sm text-red-500 mt-1">
+          {form.formState.errors[name]?.message as string}
+        </p>
+      )}
+    </div>
+  )
+}

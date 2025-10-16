@@ -1,0 +1,33 @@
+// components/ui/CurrencySelector.tsx
+'use client';
+
+import { useAppContext } from '@/components/providers/AppProvider';
+import { CURRENCIES } from '@/lib/constants';
+import { Globe } from 'lucide-react';
+
+export default function CurrencySelector() {
+  // This comment explains the global state connection.
+  // This component consumes the `currency` state and the `setCurrency` function
+  // from the AppContext. When the select value changes, it calls setCurrency,
+  // which updates the global state for the entire application.
+  const { currency, setCurrency } = useAppContext();
+
+  return (
+    <div className="flex items-center bg-white px-3 py-2 rounded-lg shadow-md">
+      <Globe className="h-5 w-5 text-gray-500 mr-2" />
+      <select
+        id="currency-select"
+        className="border-none bg-transparent focus:ring-0 focus:outline-none text-sm font-medium"
+        aria-label="Select currency"
+        value={currency}
+        onChange={(e) => setCurrency(e.target.value)}
+      >
+        {Object.entries(CURRENCIES).map(([code, { symbol }]) => (
+          <option key={code} value={code}>
+            {code} ({symbol})
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}

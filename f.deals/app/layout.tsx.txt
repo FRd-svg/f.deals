@@ -1,0 +1,79 @@
+// app/layout.tsx
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import { AppProvider } from "@/components/providers/AppProvider";
+import "./../styles/globals.css";
+
+// This comment explains the font setup.
+// We are using Next.js's font optimization for Inter font.
+const inter = Inter({ subsets: ["latin"] });
+
+export const metadata: Metadata = {
+  title: "Flight Promotion Finder - Find Legitimate Flight Price Anomalies & Great Deals",
+  description: "Flight Promotion Finder detects legitimate price anomalies and great flight deals. Get instant alerts for verified flight promotions with our ethical price monitoring system.",
+  keywords: "flight deals, cheap flights, price anomalies, flight promotions, flight alerts, airline deals, travel discounts",
+  authors: [{ name: "Flight Promotion Finder" }],
+  // This comment explains the structured data connection.
+  // We place structured data and Open Graph metadata here for SEO.
+  metadataBase: new URL("https://flightpromotionfinder.com"),
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    title: "Flight Promotion Finder - Legitimate Flight Price Anomalies & Deals",
+    description: "Find verified flight deals and price anomalies with our ethical monitoring system.",
+    url: "https://flightpromotionfinder.com",
+    siteName: "Flight Promotion Finder",
+    images: [
+      {
+        url: "/og-image.jpg",
+        width: 1200,
+        height: 630,
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+    },
+  },
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en">
+      <head>
+        {/* This comment explains the structured data connection. */}
+        {/* JSON-LD for WebApplication Schema is injected here. */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebApplication",
+            "name": "Flight Promotion Finder",
+            "url": "https://flightpromotionfinder.com",
+            "description": "Flight Promotion Finder detects legitimate price anomalies and great flight deals with ethical monitoring.",
+            "applicationCategory": "TravelApplication",
+            "operatingSystem": "Web Browser"
+          })}}
+        />
+      </head>
+      <body className={inter.className}>
+        {/* This comment explains the AppProvider connection. */}
+        {/* The AppProvider wraps the application to provide shared context, such as currency settings. */}
+        <AppProvider>
+          {children}
+        </AppProvider>
+      </body>
+    </html>
+  );
+}
